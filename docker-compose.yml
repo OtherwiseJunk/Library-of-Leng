@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "7432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql
       - ./schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
@@ -35,7 +35,7 @@ services:
       AZURE_VISION_KEY: ${AZURE_VISION_KEY:-}
       AZURE_VISION_ENDPOINT: ${AZURE_VISION_ENDPOINT:-}
     ports:
-      - "3000:3000"
+      - "7000:3000"
     volumes:
       - uploads:/app/uploads
       - mtgscan-cache:/app/.cache
@@ -49,7 +49,7 @@ services:
     build:
       context: ./frontend
     ports:
-      - "8080:80"
+      - "7080:80"
     depends_on:
       - server
 
