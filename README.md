@@ -49,7 +49,7 @@ Services:
 
 - `frontend`: React app served by nginx.
 - `server`: Express API plus Python `mtgscan` wrapper.
-- `postgres`: database initialized from `schema.sql`.
+- `postgres`: PostgreSQL 18 database initialized from `schema.sql`.
 
 ## API Surface
 
@@ -70,6 +70,32 @@ Library filters:
 - `colors`, comma-separated color identity like `W,U`
 
 ## Local Development
+
+### Dev Container
+
+Open this folder in VS Code and choose `Dev Containers: Reopen in Container`.
+
+The dev container starts a workspace container plus PostgreSQL 18, installs Node and Python dependencies, and forwards:
+
+- `3000`: Express API
+- `5173`: Vite React UI
+- `5432`: PostgreSQL
+
+Inside the dev container, start the API:
+
+```sh
+npm run dev
+```
+
+In another terminal, start the frontend:
+
+```sh
+npm run dev --prefix frontend
+```
+
+Open the dev UI at `http://localhost:5173`.
+
+### Host Machine
 
 The root package runs the API. The `frontend/` package runs Vite.
 

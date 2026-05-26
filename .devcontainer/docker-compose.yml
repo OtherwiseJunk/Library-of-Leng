@@ -1,0 +1,56 @@
+services:
+  workspace:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    command: sleep infinity
+    shm_size: "2gb"
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/mtg_inventory
+      UPLOAD_DIR: /workspaces/library-of-leng/uploads
+      PYTHON_BIN: python3
+      SCAN_SCRIPT_PATH: /workspaces/library-of-leng/scan.py
+      OCR_PROVIDER: ${OCR_PROVIDER:-paddle}
+      PADDLE_USE_GPU: ${PADDLE_USE_GPU:-false}
+      PADDLE_DEVICE: ${PADDLE_DEVICE:-cpu}
+      PADDLE_OCR_LANG: ${PADDLE_OCR_LANG:-en}
+      PADDLE_USE_ANGLE_CLS: ${PADDLE_USE_ANGLE_CLS:-true}
+      AZURE_VISION_KEY: ${AZURE_VISION_KEY:-}
+      AZURE_VISION_ENDPOINT: ${AZURE_VISION_ENDPOINT:-}
+    ports:
+      - "3000:3000"
+      - "5173:5173"
+    volumes:
+      - ..:/workspaces/library-of-leng:cached
+      - dev-node-modules:/workspaces/library-of-leng/node_modules
+      - dev-frontend-node-modules:/workspaces/library-of-leng/frontend/node_modules
+      - dev-paddle-cache:/home/node/.paddleocr
+      - dev-paddlex-cache:/home/node/.paddlex
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: mtg_inventory
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - dev-postgres-data:/var/lib/postgresql/data
+      - ../schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mtg_inventory"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  dev-node-modules:
+  dev-frontend-node-modules:
+  dev-paddle-cache:
+  dev-paddlex-cache:
+  dev-postgres-data:
