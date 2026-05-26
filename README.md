@@ -1,0 +1,90 @@
+# Library of Leng MTG Scanner
+
+React + Express + PostgreSQL staging pipeline for scanning Magic cards with `mtgscan`.
+
+## Run With Docker
+
+1. Create `.env` from `.env.example`.
+2. Start the stack:
+
+```sh
+docker compose up --build
+```
+
+Open the UI at `http://localhost:8080`.
+
+The default OCR provider is local PaddleOCR on CPU. To use Azure instead, set:
+
+```sh
+OCR_PROVIDER=azure
+AZURE_VISION_KEY=...
+AZURE_VISION_ENDPOINT=...
+```
+
+## GPU PaddleOCR
+
+The GPU path assumes the Docker host is Linux with a working NVIDIA driver and NVIDIA Container Toolkit. First verify this on the host:
+
+```sh
+nvidia-smi
+docker run --rm --gpus all nvidia/cuda:11.8.0-base-ubuntu22.04 nvidia-smi
+```
+
+Then run the GPU server image:
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build
+```
+
+The GPU image uses CUDA 11.8 and installs `paddlepaddle-gpu` from PaddlePaddle's CUDA 11.8 package index. This is a good fit for a GTX 1080-era host while keeping the normal CPU image simpler.
+
+Relevant OCR settings:
+
+- `OCR_PROVIDER=paddle` or `azure`
+- `PADDLE_DEVICE=cpu` or `gpu:0`
+- `PADDLE_USE_GPU=false` or `true`
+- `PADDLE_OCR_LANG=en`
+
+Services:
+
+- `frontend`: React app served by nginx.
+- `server`: Express API plus Python `mtgscan` wrapper.
+- `postgres`: database initialized from `schema.sql`.
+
+## API Surface
+
+- `POST /api/scan`: async upload, returns `202` with `scanId`.
+- `POST /api/scan/sync`: upload and wait for OCR completion.
+- `POST /api/scans/:id/retry`: synchronous retry for a failed scan.
+- `GET /api/scans/:id`: scan detail.
+- `GET /api/failures`: failed scans with warehouse locations.
+- `GET /api/search?q=NAME`: completed or approved scans by card name.
+- `GET /api/library`: completed or approved scans with filters.
+
+Library filters:
+
+- `q`
+- `type`
+- `set`
+- `rarity`
+- `colors`, comma-separated color identity like `W,U`
+
+## Local Development
+
+The root package runs the API. The `frontend/` package runs Vite.
+
+```sh
+npm install
+pip3 install -r requirements.txt
+npm run dev
+```
+
+In another shell:
+
+```sh
+cd frontend
+npm install
+npm run dev
+```
+
+Vite proxies `/api` to `http://localhost:3000`.
