@@ -95,6 +95,15 @@ npm run dev --prefix frontend
 
 Open the dev UI at `http://localhost:5173`.
 
+## Troubleshooting
+
+If OCR fails with `libGL.so.1: cannot open shared object file`, rebuild the server image after pulling the latest Dockerfile changes:
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml build server
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up
+```
+
 ### Host Machine
 
 The root package runs the API. The `frontend/` package runs Vite.

@@ -47,6 +47,7 @@ const upload = multer({
 });
 
 app.use(express.json());
+app.use('/uploads', express.static(uploadDir));
 
 app.get('/health', (_req, res) => {
   res.json({ ok: true });
@@ -142,7 +143,7 @@ app.get('/api/failures', async (_req, res, next) => {
        LIMIT 100`
     );
 
-    res.json({ scans: result.rows });
+    res.json({ scans: result.rows.map(serializeScan) });
   } catch (error) {
     next(error);
   }
@@ -166,7 +167,7 @@ app.get('/api/search', async (req, res, next) => {
       [`%${q}%`]
     );
 
-    res.json({ results: result.rows });
+    res.json({ results: result.rows.map(serializeScan) });
   } catch (error) {
     next(error);
   }
@@ -189,7 +190,7 @@ app.get('/api/library', async (req, res, next) => {
       [...filters.values, limit]
     );
 
-    res.json({ cards: result.rows });
+    res.json({ cards: result.rows.map(serializeScan) });
   } catch (error) {
     next(error);
   }
@@ -229,7 +230,7 @@ async function getScanById(req, res, next) {
       return res.status(404).json({ error: 'Scan not found.' });
     }
 
-    res.json(scan);
+    res.json(serializeScan(scan));
   } catch (error) {
     next(error);
   }
@@ -446,6 +447,33 @@ function mapScryfallCard(card) {
 async function loadScan(scanId) {
   const result = await pool.query('SELECT * FROM scans WHERE id = $1', [scanId]);
   return result.rows[0] || null;
+}
+
+function serializeScan(scan) {
+  if (!scan) {
+    return scan;
+  }
+
+  return {
+    ...scan,
+    image_url: scan.image_url,
+    uploaded_image_url: uploadedImageUrl(scan.image_path)
+  };
+}
+
+function uploadedImageUrl(imagePath) {
+  if (!imagePath) {
+    return null;
+  }
+
+  const resolvedPath = path.resolve(imagePath);
+  const relativePath = path.relative(uploadDir, resolvedPath);
+
+  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+    return null;
+  }
+
+  return `/uploads/${relativePath.split(path.sep).map(encodeURIComponent).join('/')}`;
 }
 
 async function markScanFailed(scanId, message) {

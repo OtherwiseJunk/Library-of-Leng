@@ -270,6 +270,7 @@ function FailQueue() {
       <div className="list">
         {failures.map(scan => (
           <article className="row-card" key={scan.id}>
+            <UploadedScanImage scan={scan} />
             <div>
               <span className="eyebrow">Scan {scan.id}</span>
               <h3>{scan.target_location}</h3>
@@ -424,6 +425,12 @@ function CardRow({ card }) {
       </div>
     </article>
   );
+}
+
+function UploadedScanImage({ scan }) {
+  return scan.uploaded_image_url
+    ? <img className="scan-thumb" src={scan.uploaded_image_url} alt={`Failed scan ${scan.id}`} />
+    : <div className="scan-thumb missing" aria-hidden="true" />;
 }
 
 function LibraryCard({ card }) {

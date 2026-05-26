@@ -3,7 +3,7 @@ FROM node:20-bookworm-slim
 WORKDIR /app
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 python3-pip \
+  && apt-get install -y --no-install-recommends libglib2.0-0 libgl1 libgomp1 libsm6 libxext6 python3 python3-pip \
   && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package.json

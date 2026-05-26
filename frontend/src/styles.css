@@ -357,7 +357,16 @@ label {
   width: 62px;
 }
 
-.card-thumb.missing {
+.scan-thumb {
+  background: #dfe5df;
+  border-radius: 8px;
+  height: 112px;
+  object-fit: cover;
+  width: 84px;
+}
+
+.card-thumb.missing,
+.scan-thumb.missing {
   border: 1px dashed #aeb8af;
 }
 
