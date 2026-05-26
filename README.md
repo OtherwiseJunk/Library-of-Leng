@@ -104,6 +104,13 @@ docker compose -f docker-compose.yml -f docker-compose.gpu.yml build server
 docker compose -f docker-compose.yml -f docker-compose.gpu.yml up
 ```
 
+If Docker build fails with `Release file ... is not valid yet`, the Docker host clock is behind the package repository metadata. Sync the host clock, then rebuild:
+
+```sh
+timedatectl status
+sudo timedatectl set-ntp true
+```
+
 ### Host Machine
 
 The root package runs the API. The `frontend/` package runs Vite.
