@@ -133,6 +133,32 @@ app.post('/api/scans/:id/retry', upload.single('image'), async (req, res, next) 
 app.get('/api/scan/:id', getScanById);
 app.get('/api/scans/:id', getScanById);
 
+app.delete('/api/scans/:id', async (req, res, next) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM scans WHERE id = $1 RETURNING image_path',
+      [req.params.id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: 'Scan not found.' });
+    }
+
+    const imagePath = result.rows[0].image_path;
+    if (imagePath) {
+      const resolved = path.resolve(imagePath);
+      const relative = path.relative(uploadDir, resolved);
+      if (!relative.startsWith('..') && !path.isAbsolute(relative)) {
+        fs.unlink(resolved, () => {});
+      }
+    }
+
+    res.status(204).end();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get('/api/failures', async (_req, res, next) => {
   try {
     const result = await pool.query(

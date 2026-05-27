@@ -8,6 +8,7 @@ import {
   Loader2,
   RefreshCcw,
   Search,
+  Trash2,
   Upload,
   XCircle
 } from 'lucide-react';
@@ -336,6 +337,11 @@ function LibraryView() {
   });
   const [cards, setCards] = useState([]);
 
+  async function deleteCard(id) {
+    await api(`/api/scans/${id}`, { method: 'DELETE' });
+    setCards(current => current.filter(c => c.id !== id));
+  }
+
   const queryString = useMemo(() => {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
@@ -389,7 +395,7 @@ function LibraryView() {
       </div>
 
       <div className="card-grid">
-        {cards.map(card => <LibraryCard key={card.id} card={card} />)}
+        {cards.map(card => <LibraryCard key={card.id} card={card} onDelete={deleteCard} />)}
       </div>
     </section>
   );
@@ -433,7 +439,7 @@ function UploadedScanImage({ scan }) {
     : <div className="scan-thumb missing" aria-hidden="true" />;
 }
 
-function LibraryCard({ card }) {
+function LibraryCard({ card, onDelete }) {
   return (
     <article className="library-card">
       <CardImage card={card} />
@@ -442,6 +448,14 @@ function LibraryCard({ card }) {
         <p>{card.card_type || 'Unknown type'}</p>
         <span>{card.target_location}</span>
       </div>
+      <button
+        className="delete-btn"
+        type="button"
+        title="Delete"
+        onClick={() => onDelete(card.id)}
+      >
+        <Trash2 size={15} />
+      </button>
     </article>
   );
 }

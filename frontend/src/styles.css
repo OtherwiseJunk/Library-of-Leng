@@ -334,6 +334,22 @@ label {
   display: grid;
   gap: 12px;
   padding: 12px;
+  position: relative;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 4px;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+}
+
+.delete-btn:hover {
+  color: #c0392b;
 }
 
 .library-card .card-thumb {
