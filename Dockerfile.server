@@ -14,11 +14,11 @@ COPY requirements.cpu.txt requirements.cpu.txt
 RUN pip3 install --break-system-packages --no-cache-dir -r requirements.cpu.txt -i https://www.paddlepaddle.org.cn/packages/stable/cpu/
 RUN pip3 install --break-system-packages --no-cache-dir -r requirements.txt
 
-COPY server.js scan.py ./
+COPY server.js scan.py warmup.py ./
 
 ENV OCR_PROVIDER=paddle
 ENV PADDLE_USE_GPU=false
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["sh", "-c", "python3 /app/warmup.py && node server.js"]

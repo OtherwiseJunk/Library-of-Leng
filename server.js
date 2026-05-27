@@ -367,8 +367,13 @@ function runPythonScan(imagePath) {
       try {
         parsed = JSON.parse(stdout);
       } catch (error) {
-        const message = stderr.trim() || stdout.trim() || error.message;
-        reject(new Error(`Could not parse scan.py JSON output: ${message}`));
+        const lastStderrLine = stderr
+          .split('\n')
+          .map(l => l.replace(/\x1b\[[0-9;]*m/g, '').trim())
+          .filter(Boolean)
+          .pop() || '';
+        const message = lastStderrLine || stdout.trim() || error.message;
+        reject(new Error(`scan.py failed: ${message}`));
         return;
       }
 

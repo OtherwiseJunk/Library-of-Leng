@@ -1,2 +1,2 @@
 mtgscan==1.0.8
-paddleocr==3.3.3
+paddleocr==2.7.3

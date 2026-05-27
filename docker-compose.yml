@@ -34,6 +34,7 @@ services:
       PADDLE_USE_ANGLE_CLS: ${PADDLE_USE_ANGLE_CLS:-true}
       AZURE_VISION_KEY: ${AZURE_VISION_KEY:-}
       AZURE_VISION_ENDPOINT: ${AZURE_VISION_ENDPOINT:-}
+      DISABLE_MODEL_SOURCE_CHECK: "True"
     ports:
       - "7000:3000"
     volumes:

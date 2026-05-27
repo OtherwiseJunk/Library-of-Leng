@@ -208,16 +208,26 @@ def main():
         print(json.dumps({"error": f"Image file does not exist: {image_path}"}))
         return 2
 
+    # Redirect fd 1 to stderr at OS level so PaddleX C-extension output
+    # doesn't corrupt the JSON we write to stdout.
+    real_stdout_fd = os.dup(1)
+    os.dup2(2, 1)
+
     try:
         with redirect_stdout(sys.stderr):
             result = scan_image(image_path)
-
-        print(json.dumps(result))
-        return 0
+        output = json.dumps(result)
+        exit_code = 0
     except Exception as exc:
         traceback.print_exc(file=sys.stderr)
-        print(json.dumps({"error": str(exc)}))
-        return 1
+        output = json.dumps({"error": str(exc)})
+        exit_code = 1
+    finally:
+        os.dup2(real_stdout_fd, 1)
+        os.close(real_stdout_fd)
+
+    print(output, flush=True)
+    return exit_code
 
 
 if __name__ == "__main__":
